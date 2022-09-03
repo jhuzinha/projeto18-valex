@@ -18,11 +18,11 @@ card.get('/card/information/:id',
     cardFunctions.informationCard
     );
 
-card.post('/card/block/:id', 
+card.patch('/card/block/:id', 
     cardFunctions.blockCard
     );
 
-card.post('/card/unlock/:id',
+card.patch('/card/unlock/:id',
     cardFunctions.unlockCard
     );
 

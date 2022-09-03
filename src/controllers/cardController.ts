@@ -26,13 +26,19 @@ export async function informationCard(req: Request, res: Response) {
     const id: number = Number(req.params.id);
 }
 
+interface Password {
+    'password': string, 
+}
+
 export async function blockCard(req: Request, res: Response) {
     const id: number = Number(req.params.id);
-    await cardBlock(id)
+    const body: Password = req.body;
+    await cardBlock(id, body.password)
 }
 
 
 export async function unlockCard(req: Request, res: Response) {
     const id: number = Number(req.params.id);
-    await cardUnlock(id)
+    const body: Password = req.body;
+    await cardUnlock(id, body.password)
 }

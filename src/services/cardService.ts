@@ -68,18 +68,15 @@ export async function cardCreation(apiKey: string | string[] | undefined, id: nu
 }
 
 export async function cardActivate(id: number, password: string, cvv: string) {
-    const validateCard = await cardValid(id)
+    const validCard = await cardValid(id)
 
-    const validateDate = dayjs().isSameOrBefore(dayjs(validateCard.expirationDate, 'MM/YY'))
-    if (!validateDate) {
-        throw {status: 'Bad Request', message: 'Cartão Expirado'}
-    }
+    verifyExpirationCard(validCard.expirationDate)
     
-    if (validateCard.password){
+    if (validCard.password){
         throw { type:"Conflict" , message: "Senha já cadastrada" }
     }
 
-    if (cvv != cryptr.decrypt(validateCard.securityCode)){
+    if (cvv != cryptr.decrypt(validCard.securityCode)){
         throw { type:"Unauthorized" , message: "Dados errados" }
     }
 
@@ -93,16 +90,29 @@ export async function cardInformation(id: number){
 
 }
 
-export async function cardBlock(id: number){
-    cardValid(id)
-    
+export async function cardBlock(id: number, password: string){
+    const validCard = await cardValid(id)
+    verifyExpirationCard(validCard.expirationDate)
+    if(validCard.isBlocked){
+        throw {status: 'Bad Request', message: 'Cartão já bloqueado'}
+    }
+    if(!bcrypt.compareSync(password, validCard.password)){
+        throw {status: 'Bad Request', message: 'Senha errada'}
+    }
+    await update(id, {isBlocked: true})
 
 }
 
-export async function cardUnlock(id: number){
-    cardValid(id)
-    
-
+export async function cardUnlock(id: number, password: string){
+    const validCard = await cardValid(id)
+    verifyExpirationCard(validCard.expirationDate)
+    if(!validCard.isBlocked){
+        throw {status: 'Bad Request', message: 'Cartão não bloqueado'}
+    }
+    if(!bcrypt.compareSync(password, validCard.password)){
+        throw {status: 'Bad Request', message: 'Senha errada'}
+    }
+    await update(id, {isBlocked: false})
 }
 
 async function cardValid(id: number){
@@ -110,4 +120,11 @@ async function cardValid(id: number){
     console.log(validateCard)
     verifyNotFound(validateCard)
     return validateCard
+}
+
+async function verifyExpirationCard(data: string) {
+    const validateDate = dayjs().isSameOrBefore(dayjs(data, 'MM/YY'))
+    if (!validateDate) {
+        throw {status: 'Bad Request', message: 'Cartão Expirado'}
+    }
 }
