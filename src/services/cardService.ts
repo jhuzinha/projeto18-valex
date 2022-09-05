@@ -3,18 +3,20 @@ import { findByTypeAndEmployeeId, update } from '../repositories/cardRepository.
 import { findByIdEmployee } from '../repositories/employeeRepository.js';
 import { faker } from '@faker-js/faker';
 import Cryptr from 'cryptr';
-import { TransactionTypes } from '../types/cardTypes.js';
+import { TransactionTypes, Payment, Recharge } from '../types/cardTypes.js';
 import { verifyNotFound } from '../utils/notFoundFunction.js';
 import { insert } from '../repositories/cardRepository.js';
-import { findByIdCard } from '../repositories/cardRepository.js';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import { findByCardIdPayments } from '../repositories/paymentRepository.js';
+import { findByCardIdRecharges } from '../repositories/rechargeRepository.js';
+import { verifyExpirationCard }  from './expirationCardService.js' 
+import { cardValid } from './cardValidService.js'
 
 dotenv.config();
-
 dayjs.extend(isSameOrBefore);
 dayjs.extend(customParseFormat);
 const {CRYPTR_KEY} = process.env;
@@ -28,7 +30,6 @@ export async function cardCreation(apiKey: string | string[] | undefined, id: nu
     verifyNotFound(validateEmployee)
 
     const existCard = await findByTypeAndEmployeeId(type, id)
-
     if(existCard){
         throw { type: "Conflict", message: "Card already exists"}
     }
@@ -71,6 +72,10 @@ export async function cardActivate(id: number, password: string, cvv: string) {
     const validCard = await cardValid(id)
 
     verifyExpirationCard(validCard.expirationDate)
+
+    if (validCard.isBlocked) {
+        throw { type:"Bad Request" , message: "Cartão Bloqueado" }
+    }
     
     if (validCard.password){
         throw { type:"Conflict" , message: "Senha já cadastrada" }
@@ -86,8 +91,8 @@ export async function cardActivate(id: number, password: string, cvv: string) {
 
 export async function cardInformation(id: number){
     cardValid(id)
-    
-
+    const info = calcBalance(id)
+    return info
 }
 
 export async function cardBlock(id: number, password: string){
@@ -115,16 +120,15 @@ export async function cardUnlock(id: number, password: string){
     await update(id, {isBlocked: false})
 }
 
-async function cardValid(id: number){
-    const validateCard = await findByIdCard(id)
-    console.log(validateCard)
-    verifyNotFound(validateCard)
-    return validateCard
-}
-
-async function verifyExpirationCard(data: string) {
-    const validateDate = dayjs().isSameOrBefore(dayjs(data, 'MM/YY'))
-    if (!validateDate) {
-        throw {status: 'Bad Request', message: 'Cartão Expirado'}
+export async function calcBalance(id: number){
+    const payments = await findByCardIdPayments(id)
+    const recharges = await findByCardIdRecharges(id)
+    let balance: number = 0
+    recharges.map((item: Payment) => balance += item.amount) 
+    payments.map((item: Recharge) => balance -= item.amount)
+    return {
+        balance,
+        payments,
+        recharges
     }
 }

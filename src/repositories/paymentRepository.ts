@@ -1,16 +1,10 @@
 import { connection } from "../database.js";
+import { Payment } from "../types/cardTypes.js";
 
-export interface Payment {
-  id: number;
-  cardId: number;
-  businessId: number;
-  timestamp: Date;
-  amount: number;
-}
 export type PaymentWithBusinessName = Payment & { businessName: string };
 export type PaymentInsertData = Omit<Payment, "id" | "timestamp">;
 
-export async function findByCardId(cardId: number) {
+export async function findByCardIdPayments(cardId: number) {
   const result = await connection.query<PaymentWithBusinessName, [number]>(
     `SELECT 
       payments.*,

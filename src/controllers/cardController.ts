@@ -1,6 +1,13 @@
 import { Response, Request } from "express";
-import { cardActivate, cardBlock, cardCreation, cardUnlock } from "../services/cardService.js";
+import { cardActivate, cardBlock, cardCreation, cardInformation, cardUnlock } from "../services/cardService.js";
 import { TransactionTypes } from '../types/cardTypes.js';
+interface Password {
+    'password': string, 
+}
+interface Activate {
+    'password': string, 
+    'cvv': string
+}
 
 export async function createCard(req: Request, res: Response) {
     const { "x-api-key": apiKey } = req.headers;
@@ -10,11 +17,6 @@ export async function createCard(req: Request, res: Response) {
     res.sendStatus(201)
 }
  
-interface Activate {
-    'password': string, 
-    'cvv': string
-}
-
 export async function ativateCard(req: Request, res: Response) {
     const id: number = Number(req.params.id);
     const body: Activate = req.body;
@@ -24,16 +26,15 @@ export async function ativateCard(req: Request, res: Response) {
 
 export async function informationCard(req: Request, res: Response) {
     const id: number = Number(req.params.id);
-}
-
-interface Password {
-    'password': string, 
+    const infoCard = await cardInformation(id)
+    res.status(200).send(infoCard)
 }
 
 export async function blockCard(req: Request, res: Response) {
     const id: number = Number(req.params.id);
     const body: Password = req.body;
     await cardBlock(id, body.password)
+    res.sendStatus(200)
 }
 
 
@@ -41,4 +42,5 @@ export async function unlockCard(req: Request, res: Response) {
     const id: number = Number(req.params.id);
     const body: Password = req.body;
     await cardUnlock(id, body.password)
+    res.sendStatus(200)
 }

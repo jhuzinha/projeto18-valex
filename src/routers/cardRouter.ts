@@ -4,7 +4,7 @@ import Validate from '../middlewares/joiValidateMiddlewares.js';
 
 const card = Router();
 
-card.post('/card/create/:id', 
+card.post('/card/create/employee/:id', 
     Validate('create'),
     cardFunctions.createCard
     );
@@ -24,12 +24,6 @@ card.patch('/card/block/:id',
 
 card.patch('/card/unlock/:id',
     cardFunctions.unlockCard
-    );
-
-card.post('/card/refills', 
-    );
-
-card.post('/card/buy-POS', 
     );
 
 export default card;
