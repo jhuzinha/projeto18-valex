@@ -9,6 +9,6 @@ dayjs.extend(customParseFormat);
 export async function verifyExpirationCard(data: string) {
     const validateDate = dayjs().isSameOrBefore(dayjs(data, 'MM/YY'))
     if (!validateDate) {
-        throw {status: 'Bad Request', message: 'Cartão Expirado'}
+        throw {type: 'Bad Request', message: 'Cartão Expirado'}
     }
 }

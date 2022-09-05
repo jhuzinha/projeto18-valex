@@ -36,6 +36,7 @@ export async function cardCreation(apiKey: string | string[] | undefined, id: nu
 
     const number = faker.finance.creditCardNumber('####-####-####-####');
     const CVV = faker.finance.creditCardCVV();
+    console.log(CVV)
     const securityCode = cryptr.encrypt(CVV)
 
     const nameEmployee = (validateEmployee.fullName).split(' ');

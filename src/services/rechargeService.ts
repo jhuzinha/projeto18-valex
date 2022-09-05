@@ -1,4 +1,4 @@
-import { insert } from "../repositories/rechargeRepository";
+import { insert } from "../repositories/rechargeRepository.js";
 import { cardValid } from "./cardValidService.js";
 import { verifyExpirationCard } from "./expirationCardService.js";
 import { RechargeInsertData } from "../repositories/rechargeRepository.js";
@@ -11,7 +11,7 @@ export async function cardRecharges(id: number, value: number) {
     verifyExpirationCard(validCard.expirationDate)
     
     const data: RechargeInsertData = {
-        cardId:  validCard.id,
+        cardId:  id,
         amount: value
     }
 

@@ -14,16 +14,16 @@ export async function cardPayment(amount: number, password: string, businessId: 
         throw { type:"Bad Request" , message: "Cartão não ativo" }
     }
     if(!bcrypt.compareSync(password, validCard.password)){
-        throw {status: 'Bad Request', message: 'Senha errada'}
+        throw {type: 'Bad Request', message: 'Senha errada'}
     }
     const business = await findById(businessId)
     verifyNotFound(business)
     if (business.type !== validCard.type){
-        throw {status: 'Bad Request', message: 'Cartão invalido nesse estabelecimento'}
+        throw {type: 'Bad Request', message: 'Cartão invalido nesse estabelecimento'}
     } 
     const info = await calcBalance(id)
-    if(info.balance < amount){
-        throw {status: 'Bad Request', message: 'Saldo não suficiente'}
+    if(info.balance - amount < 0){
+        throw {type: 'Bad Request', message: 'Saldo não suficiente'}
     }
 
     const data: PaymentInsertData = {
