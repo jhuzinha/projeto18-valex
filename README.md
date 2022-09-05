@@ -1,4 +1,4 @@
-# projeto18-valex
+# VALEX
 
 Projeto em TypeScript e postgreSQL. API de cartões de benefícios. A API será responsável pela criação, recarga, ativação, assim como o processamento das compras.
 
