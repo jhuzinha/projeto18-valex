@@ -8,7 +8,7 @@ export default function Validate(schema: string) {
     }
     return async function(req: Request, res: Response, next: NextFunction) {
         try {
-            const validated = allschemas[schema].validate(req.body, { abortEarly: false })
+            const validated = allschemas[schema].validate(req.body, { abortEarly: true })
             if (validated.error) {
                 return res.status(422).send(validated.error.message);
             }

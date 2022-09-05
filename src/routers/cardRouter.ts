@@ -19,10 +19,12 @@ card.get('/card/information/:id',
     );
 
 card.patch('/card/block/:id', 
+    Validate('password'),
     cardFunctions.blockCard
     );
 
 card.patch('/card/unlock/:id',
+    Validate('password'),
     cardFunctions.unlockCard
     );
 
